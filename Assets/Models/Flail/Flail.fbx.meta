@@ -1,0 +1,121 @@
+fileFormatVersion: 2
+guid: 38764ba52f92f95428efe3c909259cb8
+timeCreated: 1441847284
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: BlastShield
+    100002: //RootNode
+    100004: Hammer
+    100006: HammerLink
+    100008: HammerPivot
+    100010: LiftLinkFront
+    100012: LiftLinkTop
+    100014: LiftPiston
+    100016: PivotMount
+    100018: Rotator
+    100020: Yoke
+    400000: BlastShield
+    400002: //RootNode
+    400004: Hammer
+    400006: HammerLink
+    400008: HammerPivot
+    400010: LiftLinkFront
+    400012: LiftLinkTop
+    400014: LiftPiston
+    400016: PivotMount
+    400018: Rotator
+    400020: Yoke
+    2300000: BlastShield
+    2300002: Hammer
+    2300004: HammerLink
+    2300006: HammerPivot
+    2300008: LiftLinkFront
+    2300010: LiftLinkTop
+    2300012: LiftPiston
+    2300014: PivotMount
+    2300016: Rotator
+    2300018: Yoke
+    3300000: BlastShield
+    3300002: Hammer
+    3300004: HammerLink
+    3300006: HammerPivot
+    3300008: LiftLinkFront
+    3300010: LiftLinkTop
+    3300012: LiftPiston
+    3300014: PivotMount
+    3300016: Rotator
+    3300018: Yoke
+    4300000: LiftLinkTop
+    4300002: LiftLinkFront
+    4300004: LiftPiston
+    4300006: PivotMount
+    4300008: Yoke
+    4300010: Rotator
+    4300012: HammerPivot
+    4300014: HammerLink
+    4300016: Hammer
+    4300018: BlastShield
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
