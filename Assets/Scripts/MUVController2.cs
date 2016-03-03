@@ -1,10 +1,8 @@
 ﻿#pragma warning disable 0414 // private field assigned but not used
 
 using UnityEngine;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 

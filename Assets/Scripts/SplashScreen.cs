@@ -11,17 +11,12 @@ public class SplashScreen : MonoBehaviour {
 
     void Start() {
         CameraFade.StartAlphaFade(Color.black, true, 2f);
-        StartCoroutine(BlockWait());
-        
+        StartCoroutine(BlockWait());        
     }
 
     IEnumerator BlockWait() {
         yield return new WaitForSeconds(2f);
         CameraFade.StartAlphaFade(Color.black, false, 2f, 2f, 1);
-    }
-
-
-    void Update() {
     }
 
     void OnCollisionEnter(Collision collision) {

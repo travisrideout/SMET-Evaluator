@@ -21,14 +21,16 @@ public class MainMenu : MonoBehaviour {
 
     void Start () {
         DataManagement.LoadData();
-        InitData();
+        InitData();        
         CameraFade.StartAlphaFade(Color.black, true, 2);
 	    StartCoroutine(PayloadCycle());  
     } 
 
+    /// <summary>
+    /// Use loaded data to set menu values
+    /// </summary>
     private void InitData() {
         optionsPanel.transform.FindChild("Master Volume").GetComponent<Slider>().value = AudioListener.volume;
-        Debug.Log("Initalizing saved data");
     }
 
     // loop through showing payloads
