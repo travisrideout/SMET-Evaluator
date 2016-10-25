@@ -7,22 +7,26 @@ using System.Collections.Generic;
 [RequireComponent(typeof(Rigidbody))]
 
 public class MUVController2 : MonoBehaviour {
-
     //Rigidbody.
     private Rigidbody rigid;
 
-    //Enables/Disables controlling the vehicle.
-    public bool canControl = true;
+    //Debugging
+    public bool testBool = true;
+    private int debugCount = 0;
+    public float instPower = 0;
+    public float smoothPower = 0;
+    private float powerSum = 0;
+    public float powerUsed = 0;
+    public float systemEfficiency = 60.0f;  
+    public float batteryCapacity = 10000; //Wh
+    public float batteryPercentRemaining = 100;
+    public float batteryTimeRemaining = 0;
+    public float torque = 0;
+            
     public bool runEngineAtAwake = true;
     public bool engineRunning = false;
-    public bool slave = false;
+    public bool slave = false;    
     private bool engineStarting = false;
-
-    //Reversing Bool.
-    private bool reversing = false;
-    private bool autoReverse = true;
-    private bool canGoReverseNow = false;
-    private float reverseDelay = 0f;
 
     //Wheel Transforms Of The Vehicle.	
     public Transform[] wheelTransform_L;
@@ -46,7 +50,7 @@ public class MUVController2 : MonoBehaviour {
     //Springs
     public Transform[] shockSpring_L;
     public Transform[] shockSpring_R;
-
+    
     //Track Customization.
     public GameObject leftTrackMesh;
     public GameObject rightTrackMesh;
@@ -75,34 +79,30 @@ public class MUVController2 : MonoBehaviour {
 
     //Engine
     public AnimationCurve engineTorqueCurve;
+    public AnimationCurve brakeTorqueCurve;
     public float engineTorque = 200.0f;
     public float brakeTorque = 5000.0f;
     public float minEngineRPM = 1000.0f;
     public float maxEngineRPM = 3000.0f;
     public float maxSpeed = 5.0f;
-    public float steerTorque = 75f;
     private float speed;
-    private float defSteerAngle;
     private float acceleration = 0f;
     private float lastVelocity = 0f;
     private float engineRPM = 0.0f;
 
-    //Inputs.
+    //Inputs
     public float gasInput = 0f;
     public float brakeInput = 0f;
     public float steerInput = 0f;
-    public float fuelInput = 1f;
 
-    //Sound Effects.
+    //Sound Effects
     private AudioSource engineStartUpAudio;
     private AudioSource engineIdleAudio;
     private AudioSource engineRunningAudio;
-    private AudioSource brakeAudio;
 
     public AudioClip engineStartUpAudioClip;
     public AudioClip engineIdleAudioClip;
     public AudioClip engineRunningAudioClip;
-    public AudioClip brakeClip;
 
     //Sound Limits.
     public float minEngineSoundPitch = .5f;
@@ -133,7 +133,7 @@ public class MUVController2 : MonoBehaviour {
 
         if (runEngineAtAwake) {
             KillOrStartEngine();
-        }
+        }        
     }
 
     //TODO: Set each wheel collider radius = wheeltransform radius + track thickness
@@ -142,12 +142,12 @@ public class MUVController2 : MonoBehaviour {
         foreach (WheelCollider wc in wheelcolliders) {
             allWheelColliders.Add(wc);
         }
+        allWheelColliders[0].ConfigureVehicleSubsteps(5, 12, 15);
     }
 
     void SoundsInit() {
         engineIdleAudio = RTCCreateAudioSource.NewAudioSource(gameObject, "engineIdleAudio", 5f, .5f, engineIdleAudioClip, true, true, false);
         engineRunningAudio = RTCCreateAudioSource.NewAudioSource(gameObject, "engineRunningAudio", 5f, 0f, engineRunningAudioClip, true, true, false);
-        brakeAudio = RTCCreateAudioSource.NewAudioSource(gameObject, "Brake Sound AudioSource", 5, 0, brakeClip, true, true, false);
     }    
 
     public void KillOrStartEngine() {
@@ -203,158 +203,114 @@ public class MUVController2 : MonoBehaviour {
         Braking();
         Inputs();
         Smoke();
-    }
+    }    
 
-    void Engine() {
-        //Reversing Bool.
-        if (gasInput < 0 && transform.InverseTransformDirection(rigid.velocity).z < 1 && canGoReverseNow)
-            reversing = true;
-        else
-            reversing = false;
-
-        speed = rigid.velocity.magnitude * 2.23694f;
-
-        //Acceleration Calculation.
-        acceleration = 0f;
-        acceleration = (transform.InverseTransformDirection(rigid.velocity).z - lastVelocity) / Time.fixedDeltaTime;
-        lastVelocity = transform.InverseTransformDirection(rigid.velocity).z;
-
-        //Drag Limit.
-        rigid.drag = Mathf.Clamp((acceleration / 30f), 0f, 1f);
-
-        float rpm = 0f;
-        float wheelRPM = ((Mathf.Abs((wheelColliders_L[2].rpm * wheelColliders_L[2].radius) + (wheelColliders_R[2].rpm * wheelColliders_R[2].radius)) / 2f) / 3.25f);
-
-        if (!reversing)
-            rpm = Mathf.Clamp((Mathf.Lerp(minEngineRPM, maxEngineRPM, wheelRPM / maxSpeed) + minEngineRPM) * (Mathf.Clamp01(gasInput + Mathf.Abs(steerInput))), minEngineRPM, maxEngineRPM);
-        else
-            rpm = Mathf.Clamp((Mathf.Lerp(minEngineRPM, maxEngineRPM, wheelRPM / maxSpeed) + minEngineRPM) * (Mathf.Clamp01(brakeInput + Mathf.Abs(steerInput))), minEngineRPM, maxEngineRPM);
-
-        engineRPM = Mathf.Lerp(engineRPM, (rpm + UnityEngine.Random.Range(-50f, 50f)) * fuelInput, Time.deltaTime * 2f);
-
-        if (!engineRunning)
-            fuelInput = 0;
-        else
-            fuelInput = 1;
-
-        //Auto Reverse Bool.
-        if (autoReverse) {
-            canGoReverseNow = true;
-        }
-
+    void Engine() {     
         for (int i = 0; i < wheelColliders_L.Length; i++) {
             ApplyMotorTorque(wheelColliders_L[i], engineTorque, true);
-            if (!reversing)
-                wheelColliders_L[i].wheelDampingRate = Mathf.Lerp(50f, 0f, gasInput);
-            else
-                wheelColliders_L[i].wheelDampingRate = Mathf.Lerp(50f, 0f, brakeInput);
+            powerSum += Mathf.Abs(wheelColliders_L[i].rpm * wheelColliders_L[i].motorTorque) / 9.5488f;            
         }
 
         for (int i = 0; i < wheelColliders_R.Length; i++) {
             ApplyMotorTorque(wheelColliders_R[i], engineTorque, false);
-            if (!reversing) {
-                wheelColliders_R[i].wheelDampingRate = Mathf.Lerp(50f, 0f, gasInput);
-            } else {
-                wheelColliders_R[i].wheelDampingRate = Mathf.Lerp(50f, 0f, brakeInput);
-            }
+            powerSum += Mathf.Abs(wheelColliders_R[i].rpm * wheelColliders_R[i].motorTorque) / 9.5488f;
         }
 
-        if (wheelColliders_L[2].isGrounded || wheelColliders_R[2].isGrounded) {
-            if (Mathf.Abs(rigid.angularVelocity.y) < 1f) {
-                rigid.AddRelativeTorque((Vector3.up * steerInput) * steerTorque, ForceMode.Acceleration);
-            }
-        }
+        instPower = powerSum;  //calculate average instantaneous power in Watts
+        smoothPower = Mathf.Lerp(smoothPower, instPower, Time.deltaTime);
+        powerSum = 0;
+        powerUsed += (smoothPower * (Time.fixedDeltaTime / 3600)) / systemEfficiency; //power used in Wh
+        batteryPercentRemaining = (batteryCapacity - powerUsed) / batteryCapacity;
+        batteryTimeRemaining = (batteryCapacity - powerUsed) / smoothPower;
     }
 
+    //TODO: Need to apply correct fraction of motor torque to wheels that are grounded
     public void ApplyMotorTorque(WheelCollider wc, float torque, bool leftSide) {
-        WheelHit hit;
-        wc.GetGroundHit(out hit);
+        float wheelSpeed = Mathf.Abs(((wc.rpm * wc.radius * Mathf.PI * 2) / 60) * 2.23694f); // m/s to mph
+        speed = rigid.velocity.magnitude * 2.23694f; // m/s to mph  
 
-        if (Mathf.Abs(hit.forwardSlip) > 1f)
+        //Over speed limiter
+        if (wheelSpeed > maxSpeed || !engineRunning) {
             torque = 0;
-
-        if (speed > maxSpeed || Mathf.Abs(wc.rpm) > 1000 || !engineRunning)
-            torque = 0;
-
-        if (reversing && speed > 55)
-            torque = 0;
-
-        if (!engineRunning || !wc.isGrounded)
-            torque = 0;
-
-        if (!reversing) {
-            if (leftSide)
-                wc.motorTorque = torque * Mathf.Clamp((Mathf.Clamp(gasInput * fuelInput, 0f, 1f)) + Mathf.Clamp(steerInput, -1f, 1f), -1f, 1f) * engineTorqueCurve.Evaluate(speed);
-            else
-                wc.motorTorque = torque * Mathf.Clamp((Mathf.Clamp(gasInput * fuelInput, 0f, 1f)) + Mathf.Clamp(-steerInput, -1f, 1f), -1f, 1f) * engineTorqueCurve.Evaluate(speed);
-        } else {
-            if (leftSide)
-                wc.motorTorque = -torque * Mathf.Clamp((Mathf.Clamp(brakeInput * fuelInput, 0f, 1f)) + Mathf.Clamp(steerInput, -1f, 1f), -1f, 1f) * engineTorqueCurve.Evaluate(speed);
-            else
-                wc.motorTorque = -torque * Mathf.Clamp((Mathf.Clamp(brakeInput * fuelInput, 0f, 1f)) + Mathf.Clamp(-steerInput, -1f, 1f), -1f, 1f) * engineTorqueCurve.Evaluate(speed);
         }
-    }
 
-    public void ApplyBrakeTorque(WheelCollider wc, float brake) {
-        wc.brakeTorque = brake;
-    }
+        //Traction control - to limit wheel spin 
+        //WheelHit wh;
+        //wc.GetGroundHit(out wh);
+        //if (!wc.isGrounded) { //Mathf.Abs(wh.forwardSlip) > 0.5f || 
+        //    torque = 0;
+        //    //Debug.Log("slip: " + wc.name + " " + wh.forwardSlip);
+        //}
 
-    public void Braking() {
-        for (int i = 0; i < allWheelColliders.Count; i++) {
-            if (brakeInput > .1f && !reversing) {
-                ApplyBrakeTorque(allWheelColliders[i], brakeTorque * (brakeInput));
-            } else if (brakeInput > .1f && reversing) {
-                ApplyBrakeTorque(allWheelColliders[i], 0f);
-            } else if (gasInput < .1f && Mathf.Abs(steerInput) < .1f) {
-                ApplyBrakeTorque(allWheelColliders[i], 10f);
+        if (gasInput > 0.1f) {
+            if (leftSide) {
+                wc.motorTorque = torque * Mathf.Clamp01(gasInput + Mathf.Clamp01(-steerInput)) * engineTorqueCurve.Evaluate(speed);
             } else {
-                ApplyBrakeTorque(allWheelColliders[i], 0f);
+                wc.motorTorque = torque * Mathf.Clamp01(gasInput + Mathf.Clamp01(steerInput)) * engineTorqueCurve.Evaluate(speed);
             }
-
-            // slow on downhills
-            if (speed > maxSpeed) {
-                ApplyBrakeTorque(allWheelColliders[i], 50f);
+        } else if (brakeInput > 0.1f) {
+            if (leftSide) {
+                wc.motorTorque = -torque * Mathf.Clamp01(brakeInput + Mathf.Clamp01(steerInput)) * engineTorqueCurve.Evaluate(speed);
+            } else {
+                wc.motorTorque = -torque * Mathf.Clamp01(brakeInput + Mathf.Clamp01(-steerInput)) * engineTorqueCurve.Evaluate(speed);
             }
-        }
-
-        //Try turning using braking
-        //if (steerInput < -0.1f)            
-        //{
-        //    for (int i = 0; i < wheelColliders_L.Length; i++)
-        //    {
-        //        ApplyBrakeTorque(allWheelColliders[i], brakeTorque * Mathf.Abs(steerInput));
-        //        print("Braking Left Track " + steerInput);
-        //    }
-        //}
-        //else if (steerInput > 0.1f)
-        //{
-        //    for (int i = 0; i < wheelColliders_R.Length; i++)
-        //    {
-        //        ApplyBrakeTorque(allWheelColliders[i], brakeTorque * steerInput);
-        //        print("Braking Right Track " + steerInput);
-        //    }
-        //}
-    }
-
-    void Inputs() {
-        if (!canControl) {
-            gasInput = 0;
-            brakeInput = 0;
-            steerInput = 0;
-            return;
-        }
-
-        //Motor Input.
-        gasInput = -Input.GetAxis("Vertical");
-
-        //Brake Input
-        brakeInput = -Mathf.Clamp(-Input.GetAxis("Vertical"), -1f, 0f);
-
-        //Steering Input, flipped for Slave
-        if (!slave) {
-            steerInput = Input.GetAxis("Horizontal");
+        } else if (Mathf.Abs(steerInput) > 0.1f) {
+            if (leftSide) {
+                wc.motorTorque = -torque * steerInput * 0.75f;// * engineTorqueCurve.Evaluate(wheelSpeed);
+            } else {
+                wc.motorTorque = torque * steerInput * 0.75f;// * engineTorqueCurve.Evaluate(wheelSpeed);
+            }
         } else {
+            wc.motorTorque = 0;
+        }        
+        
+        //invert motor torque because Unity is left hand rule
+        wc.motorTorque = -wc.motorTorque;
+    }   
+
+    //TODO: Brake to eliminate rotation in wrong direction, roll back
+    public void Braking() {  
+        for (int i = 0; i < allWheelColliders.Count; i++) {            
+            if (speed > maxSpeed) { // slow on downhills
+                allWheelColliders[i].brakeTorque = brakeTorque;                
+            } else if (gasInput < .1f && Mathf.Abs(steerInput) < .1f && brakeInput < 0.1f) { // stop coasting
+                allWheelColliders[i].brakeTorque = Mathf.Infinity;
+            } else {    // release brakes
+                allWheelColliders[i].brakeTorque = 0.0f;
+            }
+        }
+
+        //Assist turning using braking
+        //Brake left track if going forward and turning left or going backwards and turning right
+        if ((steerInput > 0.1f && gasInput > 0.1f) || (steerInput < -0.1f && brakeInput > 0.1f)) {
+            for (int i = 0; i < wheelColliders_L.Length; i++) {
+                float wheelSpeed = Mathf.Abs(((wheelColliders_L[i].rpm * wheelColliders_L[i].radius * Mathf.PI * 2) / 60) * 2.23694f); // m/s to mph
+                wheelColliders_L[i].motorTorque = 0;
+                wheelColliders_L[i].brakeTorque = brakeTorque * Mathf.Abs(steerInput) * brakeTorqueCurve.Evaluate(wheelSpeed);
+            }
+        //Brake right track if going forward and turning right or going backwards and turning left
+        } else if ((steerInput < -0.1f && gasInput > 0.1f) || (steerInput > 0.1f && brakeInput > 0.1f)) {
+            for (int i = 0; i < wheelColliders_R.Length; i++) {
+                float wheelSpeed = Mathf.Abs(((wheelColliders_R[i].rpm * wheelColliders_R[i].radius * Mathf.PI * 2) / 60) * 2.23694f); // m/s to mph
+                wheelColliders_R[i].motorTorque = 0;
+                wheelColliders_R[i].brakeTorque = brakeTorque * Mathf.Abs(steerInput) * brakeTorqueCurve.Evaluate(wheelSpeed);
+            }
+        }        
+    }    
+
+    //TODO: Add deadband range in percent, update gas/brake in engine
+    void Inputs() {
+        //Motor Input.
+        gasInput = Mathf.Clamp(Input.GetAxis("Vertical"), 0f, 1f);
+
+        //Brake Input - Amount of brake or reverse expressed in positive magnitude
+        brakeInput = -Mathf.Clamp(Input.GetAxis("Vertical"), -1f, 0f);
+
+        //Steering Input, right positive, left negitive, flipped for Slave
+        if (!slave) {
             steerInput = -Input.GetAxis("Horizontal");
+        } else {
+            steerInput = Input.GetAxis("Horizontal");
         }
 
         
@@ -379,13 +335,14 @@ public class MUVController2 : MonoBehaviour {
     }
 
     public void Sounds() {
+        float rpm = 0.0f;
+        rpm = ((maxEngineRPM - minEngineRPM) * Mathf.Max(gasInput, Mathf.Abs(brakeInput), Mathf.Abs(steerInput))) + minEngineRPM;
+        engineRPM = Mathf.Lerp(engineRPM, (rpm + UnityEngine.Random.Range(-50f, 50f)), Time.deltaTime * 2f);
+
         //Engine Audio Volume.
         if (engineRunningAudioClip) {
-            if (!reversing)
-                engineRunningAudio.volume = Mathf.Lerp(engineRunningAudio.volume, Mathf.Clamp(Mathf.Clamp01(gasInput + Mathf.Abs(steerInput / 2f)), minEngineSoundVolume, maxEngineSoundVolume), Time.deltaTime * 10f);
-            else
-                engineRunningAudio.volume = Mathf.Lerp(engineRunningAudio.volume, Mathf.Clamp(brakeInput, minEngineSoundVolume, maxEngineSoundVolume), Time.deltaTime * 10f);
-
+            engineRunningAudio.volume = Mathf.Lerp(engineRunningAudio.volume, Mathf.Clamp(Mathf.Clamp01(gasInput + Mathf.Abs(steerInput / 2f) + brakeInput), minEngineSoundVolume, maxEngineSoundVolume), Time.deltaTime * 10f);
+            
             if (engineRunning)
                 engineRunningAudio.pitch = Mathf.Lerp(engineRunningAudio.pitch, Mathf.Lerp(minEngineSoundPitch, maxEngineSoundPitch, (engineRPM) / (maxEngineRPM)), Time.deltaTime * 10f);
             else
@@ -393,30 +350,22 @@ public class MUVController2 : MonoBehaviour {
         }
 
         if (engineIdleAudioClip) {
-            if (!reversing)
-                engineIdleAudio.volume = Mathf.Lerp(engineIdleAudio.volume, Mathf.Clamp((1 + (-gasInput)), minEngineSoundVolume, 1f), Time.deltaTime * 10f);
-            else
-                engineIdleAudio.volume = Mathf.Lerp(engineIdleAudio.volume, Mathf.Clamp((1 + (-brakeInput)), minEngineSoundVolume, 1f), Time.deltaTime * 10f);
-
+            engineIdleAudio.volume = Mathf.Lerp(engineIdleAudio.volume, Mathf.Clamp((1 + (-Mathf.Max(gasInput, brakeInput))), minEngineSoundVolume, 1f), Time.deltaTime * 10f);
+            
             if (engineRunning)
                 engineIdleAudio.pitch = Mathf.Lerp(engineIdleAudio.pitch, Mathf.Lerp(minEngineSoundPitch, maxEngineSoundPitch, (engineRPM) / (maxEngineRPM)), Time.deltaTime * 10f);
             else
                 engineIdleAudio.pitch = Mathf.Lerp(engineIdleAudio.pitch, 0, Time.deltaTime * 10f);
-        }
-
-        if (!reversing)
-            brakeAudio.volume = Mathf.Lerp(0f, maxBrakeSoundVolume, Mathf.Clamp01(brakeInput) * Mathf.Lerp(0f, 1f, wheelColliders_L[2].rpm / 50f));
-        else
-            brakeAudio.volume = 0f;
+        }        
     }
 
     void AnimateGears() {
         for (int i = 0; i < uselessGearTransform_R.Length; i++) {
-            uselessGearTransform_R[i].transform.rotation = wheelColliders_R[i].transform.rotation * Quaternion.Euler(rotationValueR[Mathf.CeilToInt((wheelColliders_R.Length) / 2)], 0, 0);
+            uselessGearTransform_R[i].transform.rotation = wheelColliders_R[2].transform.rotation * Quaternion.Euler(rotationValueR[Mathf.CeilToInt((wheelColliders_R.Length) / 2)], 0, 0);
         }
 
         for (int i = 0; i < uselessGearTransform_L.Length; i++) {
-            uselessGearTransform_L[i].transform.rotation = wheelColliders_L[i].transform.rotation * Quaternion.Euler(rotationValueL[Mathf.CeilToInt((wheelColliders_L.Length) / 2)], 0, 0);
+            uselessGearTransform_L[i].transform.rotation = wheelColliders_L[2].transform.rotation * Quaternion.Euler(rotationValueL[Mathf.CeilToInt((wheelColliders_L.Length) / 2)], 0, 0);
         }
     }
 

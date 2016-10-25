@@ -1,0 +1,145 @@
+fileFormatVersion: 2
+guid: 66494ae455c33d045a049f01490893a5
+timeCreated: 1473440567
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Body
+    100002: Body_MeshPart0
+    100004: Body_MeshPart1
+    100006: Body_MeshPart2
+    100008: Body_MeshPart3
+    100010: Body_MeshPart4
+    100012: Body_MeshPart5
+    100014: Body_MeshPart6
+    100016: Body_MeshPart7
+    100018: //RootNode
+    100020: Wheel-L1
+    100022: Wheel-L2
+    100024: Wheel-L3
+    100026: Wheel-R1
+    100028: Wheel-R2
+    100030: Wheel-R3
+    400000: Body
+    400002: Body_MeshPart0
+    400004: Body_MeshPart1
+    400006: Body_MeshPart2
+    400008: Body_MeshPart3
+    400010: Body_MeshPart4
+    400012: Body_MeshPart5
+    400014: Body_MeshPart6
+    400016: Body_MeshPart7
+    400018: //RootNode
+    400020: Wheel-L1
+    400022: Wheel-L2
+    400024: Wheel-L3
+    400026: Wheel-R1
+    400028: Wheel-R2
+    400030: Wheel-R3
+    2300000: Body_MeshPart0
+    2300002: Body_MeshPart1
+    2300004: Body_MeshPart2
+    2300006: Body_MeshPart3
+    2300008: Body_MeshPart4
+    2300010: Body_MeshPart5
+    2300012: Body_MeshPart6
+    2300014: Body_MeshPart7
+    2300016: Wheel-L1
+    2300018: Wheel-L2
+    2300020: Wheel-L3
+    2300022: Wheel-R1
+    2300024: Wheel-R2
+    2300026: Wheel-R3
+    3300000: Body_MeshPart0
+    3300002: Body_MeshPart1
+    3300004: Body_MeshPart2
+    3300006: Body_MeshPart3
+    3300008: Body_MeshPart4
+    3300010: Body_MeshPart5
+    3300012: Body_MeshPart6
+    3300014: Body_MeshPart7
+    3300016: Wheel-L1
+    3300018: Wheel-L2
+    3300020: Wheel-L3
+    3300022: Wheel-R1
+    3300024: Wheel-R2
+    3300026: Wheel-R3
+    4300000: Wheel-R1
+    4300002: Wheel-R2
+    4300004: Wheel-R3
+    4300006: Wheel-L3
+    4300008: Wheel-L2
+    4300010: Wheel-L1
+    4300012: Body_MeshPart0
+    4300014: Body_MeshPart1
+    4300016: Body_MeshPart2
+    4300018: Body_MeshPart3
+    4300020: Body_MeshPart4
+    4300022: Body_MeshPart5
+    4300024: Body_MeshPart6
+    4300026: Body_MeshPart7
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 1
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 1
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
