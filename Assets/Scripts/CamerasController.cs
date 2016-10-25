@@ -143,7 +143,7 @@ public class CamerasController : MonoBehaviour {
 
     private void MUVCamPosition() {
         muvCam.transform.position = target.transform.position + target.transform.rotation * muvCamPosition;
-        muvCam.transform.rotation = target.transform.rotation * Quaternion.Euler(0,180,0);  //rotating addition 180 in y becasue model imported backwards
+        muvCam.transform.rotation = target.transform.rotation * Quaternion.Euler(0,180,0);  //rotating addition 180 in y because model imported backwards
     }
     
 }
